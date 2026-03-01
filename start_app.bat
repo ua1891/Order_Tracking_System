@@ -10,6 +10,6 @@ echo Please do not close this window while using the app.
 start http://localhost:5000
 
 :: Run the Flask application
-python app.py
+python main\app.py
 
 pause
