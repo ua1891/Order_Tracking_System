@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/" class="btn btn-outline-secondary rounded-pill btn-sm">&larr; Back to Dashboard</a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Order Information</h5>
+                <p><strong>Tracking Number:</strong> <span class="text-muted">{{ order.tracking_number }}</span></p>
+
+                <h6 class="mt-4 border-bottom pb-2 mb-3">Shipment Details</h6>
+                {% if details and details.get('TrackInfo') and details['TrackInfo']|length > 0 %}
+                {% set info = details['TrackInfo'][0] %}
+                <p><strong>Origin:</strong> <span class="text-muted">{{ info.get('origin', 'N/A') }}, {{
+                        info.get('originCountry', '') }}</span></p>
+                <p><strong>Destination:</strong> <span class="text-muted">{{ info.get('destination', 'N/A') }}, {{
+                        info.get('destinationCountry', '') }}</span></p>
+                <p><strong>Booking Date:</strong> <span class="text-muted">{{ info.get('bookingDate', 'N/A') }}</span>
+                </p>
+                {% else %}
+                <p class="text-muted">No advanced shipment details available from API.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title text-primary border-bottom pb-2 mb-4">Tracking History</h5>
+
+                {% if details and details.get('Checkpoints') %}
+                <div class="timeline">
+                    {% for checkpoint in details['Checkpoints']|reverse %}
+                    <div class="timeline-item mb-4">
+                        <div class="d-flex w-100 justify-content-between border-bottom pb-2">
+                            <h6 class="mb-1 fw-bold">{{ checkpoint.get('status', 'Unknown Status') }}</h6>
+                            <small class="text-muted">{{ checkpoint.get('dateTime', '') }}</small>
+                        </div>
+                        <p class="mb-1 text-muted">
+                            {% if checkpoint.get('recievedBy') %}
+                            Received By: {{ checkpoint.get('recievedBy') }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">No tracking history found or API is unreachable. Custom status is
+                    <strong>{{ order.current_status }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
