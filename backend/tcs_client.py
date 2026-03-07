@@ -16,6 +16,14 @@ def build_headers():
         "Accept": "application/json"
     }
 
+def parse_tracking_response(data: dict):
+    """Extract tracking information from API response."""
+    if data.get("returnStatus", {}).get("code") == SUCCESS_STATUS_CODE:
+        return data.get("TrackDetailReply")
+    
+    logger.warning(f"TCS API returned non-success code: {data.get('returnStatus')}")
+    return None
+
 def get_tracking_details(tracking_number: str) -> dict:
     """Fetch tracking details from TCS API."""
     headers = build_headers()
@@ -28,12 +36,7 @@ def get_tracking_details(tracking_number: str) -> dict:
         # Sandbox API might return specific codes. But according to Swagger, 200 is successful.
         if response.status_code == 200:
             data = response.json()
-            # Swagger schema outlines returned status is in 'returnStatus', and actual reply in 'TrackDetailReply'
-            if data.get('returnStatus', {}).get('code') == SUCCESS_STATUS_CODE:
-                return data.get('TrackDetailReply')
-            else:
-                logger.warning(f"TCS API returned non-success code for {tracking_number}: {data.get('returnStatus')}")
-                return None
+            return parse_tracking_response(data)
         else:
             logger.error(f"Error fetching tracking details for {tracking_number}: Status {response.status_code}")
             return None
