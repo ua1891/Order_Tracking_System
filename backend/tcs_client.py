@@ -9,12 +9,16 @@ CLIENT_ID = "YOUR_CLIENT_ID" # Will be replaced or configured via env in product
 REQUEST_TIMEOUT = 10
 SUCCESS_STATUS_CODE = "0200"
 
-def get_tracking_details(tracking_number: str) -> dict:
-    """Fetch tracking details from TCS API."""
-    headers = {
+def build_headers():
+    """Create headers for the TCS API request."""
+    return {
         "X-IBM-Client-Id": CLIENT_ID,
         "Accept": "application/json"
     }
+
+def get_tracking_details(tracking_number: str) -> dict:
+    """Fetch tracking details from TCS API."""
+    headers = build_headers()
     params = {
         "consignmentNo": tracking_number
     }
