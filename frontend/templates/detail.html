@@ -1,57 +1,199 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="mb-4">
-    <a href="/" class="btn btn-outline-secondary rounded-pill btn-sm">&larr; Back to Dashboard</a>
+<div class="mb-6 flex items-center justify-between">
+    <a href="/"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200">
+        <i class="ph-bold ph-arrow-left"></i> Back to Dashboard
+    </a>
+
+    <!-- Status Badge -->
+    {% if order.current_status == 'DELIVERED' %}
+    <span
+        class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wide">
+        {{ order.current_status }}
+    </span>
+    {% elif order.current_status == 'IN TRANSIT' %}
+    <span
+        class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">
+        {{ order.current_status }}
+    </span>
+    {% elif order.current_status == 'PENDING' %}
+    <span
+        class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">
+        {{ order.current_status }}
+    </span>
+    {% else %}
+    <span
+        class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-bold bg-slate-100 text-slate-700 uppercase tracking-wide">
+        {{ order.current_status }}
+    </span>
+    {% endif %}
 </div>
 
-<div class="row">
-    <div class="col-md-4">
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
-                <h5 class="card-title text-primary border-bottom pb-2 mb-3">Order Information</h5>
-                <p><strong>Tracking Number:</strong> <span class="text-muted">{{ order.tracking_number }}</span></p>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-                <h6 class="mt-4 border-bottom pb-2 mb-3">Shipment Details</h6>
-                {% if details and details.get('TrackInfo') and details['TrackInfo']|length > 0 %}
-                {% set info = details['TrackInfo'][0] %}
-                <p><strong>Origin:</strong> <span class="text-muted">{{ info.get('origin', 'N/A') }}, {{
-                        info.get('originCountry', '') }}</span></p>
-                <p><strong>Destination:</strong> <span class="text-muted">{{ info.get('destination', 'N/A') }}, {{
-                        info.get('destinationCountry', '') }}</span></p>
-                <p><strong>Booking Date:</strong> <span class="text-muted">{{ info.get('bookingDate', 'N/A') }}</span>
-                </p>
+    <!-- Left Column: Order Info -->
+    <div class="lg:col-span-4 space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+            <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-slate-400 to-slate-500"></div>
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-lg bg-slate-50 text-slate-600 flex items-center justify-center">
+                        <i class="ph-duotone ph-info text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-display font-bold text-slate-800">Order Information</h3>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tracking Number</p>
+                        <p class="text-base font-medium text-slate-800 font-mono">{{ order.tracking_number }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Last Synced</p>
+                        <p class="text-sm font-medium text-slate-600">{{ order.last_updated.strftime('%Y-%m-%d %H:%M')
+                            }}</p>
+                    </div>
+                </div>
+
+                <hr class="my-6 border-slate-100">
+
+                <div class="flex items-center gap-3 mb-5">
+                    <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i class="ph-duotone ph-map-pin text-lg"></i>
+                    </div>
+                    <h4 class="text-base font-display font-bold text-slate-800">Shipment Details</h4>
+                </div>
+
+                {% if details and details.get('shipmentinfo') and details['shipmentinfo']|length > 0 %}
+                {% set info = details['shipmentinfo'][0] %}
+                <div class="space-y-4 relative">
+                    <!-- Connecting Line -->
+                    <div class="absolute left-2.5 top-8 bottom-8 w-px bg-slate-200"></div>
+
+                    <div class="relative flex gap-4">
+                        <div
+                            class="w-5 h-5 rounded-full border-4 border-white bg-slate-300 shadow-sm relative z-10 mt-0.5">
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-0.5">Origin</p>
+                            <p class="text-sm font-medium text-slate-800">{{ info.get('origin', 'N/A') }}, {{
+                                info.get('origincountry', '') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="relative flex gap-4">
+                        <div
+                            class="w-5 h-5 rounded-full border-4 border-white bg-brand-500 shadow-sm relative z-10 mt-0.5">
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-brand-500 uppercase tracking-wider mb-0.5">Destination</p>
+                            <p class="text-sm font-medium text-slate-800">{{ info.get('destination', 'N/A') }}, {{
+                                info.get('destinationcountry', '') }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {% if info.get('bookingDate') %}
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Booking Date</p>
+                    <p class="text-sm font-medium text-slate-600">{{ info.get('bookingDate', 'N/A') }}</p>
+                </div>
+                {% endif %}
                 {% else %}
-                <p class="text-muted">No advanced shipment details available from API.</p>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                    <p class="text-sm text-slate-500 font-medium">No advanced shipment details available.</p>
+                </div>
                 {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="col-md-8">
-        <div class="card shadow-sm border-0">
-            <div class="card-body">
-                <h5 class="card-title text-primary border-bottom pb-2 mb-4">Tracking History</h5>
+    <!-- Right Column: Timeline -->
+    <div class="lg:col-span-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 h-full">
+            <div class="p-6 sm:px-8 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                    <i class="ph-duotone ph-clock text-xl"></i>
+                </div>
+                <h3 class="text-xl font-display font-bold text-slate-800">Tracking History</h3>
+            </div>
 
-                {% if details and details.get('Checkpoints') %}
-                <div class="timeline">
-                    {% for checkpoint in details['Checkpoints']|reverse %}
-                    <div class="timeline-item mb-4">
-                        <div class="d-flex w-100 justify-content-between border-bottom pb-2">
-                            <h6 class="mb-1 fw-bold">{{ checkpoint.get('status', 'Unknown Status') }}</h6>
-                            <small class="text-muted">{{ checkpoint.get('dateTime', '') }}</small>
+            <div class="p-6 sm:p-8">
+                {% if details and details.get('checkpoints') %}
+                <div class="relative">
+                    <!-- Timeline Line -->
+                    <div class="absolute left-4 sm:left-6 top-10 bottom-10 w-0.5 bg-slate-200"></div>
+
+                    <div class="space-y-8">
+                        {% for checkpoint in details['checkpoints']|reverse %}
+                        <div class="relative flex gap-6 items-start">
+                            <!-- Node -->
+                            <div class="relative z-10 w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm border-4 border-white
+                                        {% if loop.last and order.current_status == 'DELIVERED' %} bg-emerald-500 text-white
+                                        {% elif loop.last %} bg-brand-500 text-white
+                                        {% else %} bg-slate-100 text-slate-400 {% endif %}">
+                                {% if loop.last and order.current_status == 'DELIVERED' %}
+                                <i class="ph-bold ph-check text-sm sm:text-lg"></i>
+                                {% elif loop.last %}
+                                <i class="ph-bold ph-truck text-sm sm:text-lg"></i>
+                                {% else %}
+                                <div class="w-2 sm:w-3 h-2 sm:h-3 rounded-full bg-current"></div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Content -->
+                            <div
+                                class="flex-grow bg-slate-50 rounded-xl p-4 sm:p-5 border border-slate-100 shadow-sm relative top-[2px] hover:shadow-md transition-shadow">
+                                <!-- pointer arrow -->
+                                <div
+                                    class="absolute top-4 sm:top-5 -left-2 w-4 h-4 bg-slate-50 border-t border-l border-slate-100 rotate-45">
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                                    <h6 class="font-bold text-slate-800 text-base">{{ checkpoint.get('status', 'Unknown
+                                        Status') }}</h6>
+                                    <span
+                                        class="text-xs font-semibold text-slate-500 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-sm shrink-0">
+                                        <i class="ph ph-calendar-blank mr-1"></i> {{ checkpoint.get('dateTime',
+                                        checkpoint.get('date', 'Unknown Time')) }}
+                                    </span>
+                                </div>
+
+                                {% if checkpoint.get('location') %}
+                                <p class="text-sm font-medium text-slate-600 flex items-center mb-2">
+                                    <i class="ph-fill ph-map-pin text-slate-400 mr-1.5"></i> {{
+                                    checkpoint.get('location') }}
+                                </p>
+                                {% endif %}
+
+                                {% if checkpoint.get('recievedBy') or checkpoint.get('receivedBy') %}
+                                <div
+                                    class="mt-3 pt-3 border-t border-slate-200/60 inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 text-sm font-medium border border-emerald-100">
+                                    <i class="ph-fill ph-user-check mr-2 text-emerald-600"></i>
+                                    Received by: {{ checkpoint.get('recievedBy', checkpoint.get('receivedBy')) }}
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                        <p class="mb-1 text-muted">
-                            {% if checkpoint.get('recievedBy') %}
-                            Received By: {{ checkpoint.get('recievedBy') }}
-                            {% endif %}
-                        </p>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
                 {% else %}
-                <div class="alert alert-warning">No tracking history found or API is unreachable. Custom status is
-                    <strong>{{ order.current_status }}</strong>
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-6 rounded-r-xl shadow-sm flex gap-4">
+                    <div class="text-amber-500 shrink-0 mt-0.5">
+                        <i class="ph-fill ph-warning-circle text-2xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-amber-800 font-bold text-lg mb-1">No detailed tracking history</h4>
+                        <p class="text-amber-700/80 text-sm font-medium mb-3">We couldn't retrieve checkpoint history
+                            from the API right now, but we have the current status cached automatically.</p>
+                        <span
+                            class="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold bg-white text-slate-800 shadow-sm border border-amber-200/50">
+                            Cached Status: <span class="text-brand-600 ml-2 uppercase">{{ order.current_status }}</span>
+                        </span>
+                    </div>
                 </div>
                 {% endif %}
             </div>

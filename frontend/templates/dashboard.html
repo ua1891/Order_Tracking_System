@@ -1,122 +1,185 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-5">
-    <!-- Add New Order Form -->
-    <div class="col-md-5">
-        <div class="card premium-card shadow-lg border-0 mb-4">
-            <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0">
-                <h5 class="card-title fw-bold text-gradient mb-1">Track New Order</h5>
-                <p class="text-muted small">Enter your TCS tracking number below</p>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="/">
-                    <div class="mb-4 position-relative form-group-custom">
-                        <i class="bi bi-search position-absolute text-muted input-icon"></i>
-                        <input type="text" name="tracking_number" class="form-control form-control-lg custom-input ps-5"
-                            required placeholder="e.g. 1000001">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- Left Column: Add Order & Stats -->
+    <div class="lg:col-span-4 space-y-6">
+
+        <!-- Track New Order Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative group">
+            <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-400 to-indigo-500"></div>
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+                        <i class="ph-duotone ph-magnifying-glass text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-display font-bold text-slate-800">Track Parcel</h2>
+                        <p class="text-sm text-slate-500 font-medium">Enter TCS tracking number</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="/" class="space-y-4">
+                    <div class="relative">
+                        <div
+                            class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i class="ph ph-barcode text-xl"></i>
+                        </div>
+                        <input type="text" name="tracking_number" required
+                            class="block w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-medium outline-none"
+                            placeholder="e.g. 1000001">
                     </div>
                     <button type="submit"
-                        class="btn btn-primary btn-lg w-100 rounded-pill fw-semibold shadow-sm btn-hover-effect">
-                        <i class="bi bi-geo-alt me-2"></i> Start Tracking
+                        class="w-full flex justify-center items-center py-3.5 px-4 rounded-xl shadow-sm text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 transition-all group-hover:shadow-md">
+                        Start Tracking <i
+                            class="ph-bold ph-arrow-right ml-2 text-lg group-hover:translate-x-1 transition-transform"></i>
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- Quick Stats (Optional aesthetic addition) -->
-        <div class="row g-3">
-            <div class="col-6">
-                <div class="card premium-card border-0 shadow-sm text-center py-3">
-                    <i class="bi bi-box-seam text-primary fs-3 mb-2"></i>
-                    <h3 class="fw-bold mb-0">{{ orders|length }}</h3>
-                    <small class="text-muted">Total Orders</small>
+        <!-- Quick Stats -->
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center text-center">
+                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                    <i class="ph-fill ph-package text-xl"></i>
                 </div>
+                <h3 class="text-2xl font-bold font-display text-slate-800">{{ orders|length }}</h3>
+                <span class="text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">Total Parcels</span>
             </div>
-            <div class="col-6">
-                <div class="card premium-card border-0 shadow-sm text-center py-3">
-                    <i class="bi bi-truck text-success fs-3 mb-2"></i>
-                    <h3 class="fw-bold mb-0">
-                        {{ orders|selectattr("current_status", "equalto", "DELIVERED")|list|length }}
-                    </h3>
-                    <small class="text-muted">Delivered</small>
+
+            <div
+                class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-col items-center justify-center text-center">
+                <div
+                    class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
+                    <i class="ph-fill ph-check-circle text-xl"></i>
                 </div>
+                <h3 class="text-2xl font-bold font-display text-slate-800">
+                    {{ orders|selectattr("current_status", "equalto", "DELIVERED")|list|length }}
+                </h3>
+                <span class="text-xs font-medium text-slate-500 uppercase tracking-wider mt-1">Delivered</span>
             </div>
         </div>
     </div>
 
-    <!-- Orders List -->
-    <div class="col-md-7">
-        <div class="card premium-card shadow-lg border-0 h-100">
-            <div
-                class="card-header bg-transparent border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
-                <h5 class="card-title fw-bold text-dark mb-0">Active Shipments</h5>
-                <span class="badge rounded-pill custom-badge-light">Live Updates</span>
+    <!-- Right Column: Active Shipments -->
+    <div class="lg:col-span-8">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col">
+            <div class="p-6 sm:px-8 sm:py-6 border-b border-slate-100 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-2 h-6 bg-brand-500 rounded-full"></div>
+                    <h2 class="text-xl font-display font-bold text-slate-800">Active Shipments</h2>
+                </div>
+                <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full mr-1.5 animate-pulse"></span> Live
+                </span>
             </div>
-            <div class="card-body p-4">
-                <div class="tracking-list">
+
+            <div class="p-6 sm:p-8 flex-grow">
+                {% if orders %}
+                <div class="space-y-4">
                     {% for order in orders %}
-                    <div class="tracking-item bg-white border rounded-4 p-3 mb-3 shadow-sm hover-lift transition-all">
-                        <div class="d-flex justify-content-between align-items-md-center flex-column flex-md-row gap-3">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="icon-circle bg-light text-primary rounded-circle d-flex align-items-center justify-content-center"
-                                    style="width: 48px; height: 48px;">
-                                    <i class="bi bi-box fs-5"></i>
+
+                    <div
+                        class="group block bg-slate-50 hover:bg-white border border-slate-200 hover:border-brand-200 rounded-xl p-5 transition-all duration-200 hover:shadow-md relative overflow-hidden">
+                        <!-- Clickable overlay -->
+                        <a href="/order/{{ order.id }}" class="absolute inset-0 z-10"></a>
+
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-20">
+                            <div class="flex items-center gap-4">
+
+                                <!-- Status Icon Logic -->
+                                {% if order.current_status == 'DELIVERED' %}
+                                <div
+                                    class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                    <i class="ph-duotone ph-package text-2xl"></i>
                                 </div>
+                                {% elif order.current_status == 'IN TRANSIT' %}
+                                <div
+                                    class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                                    <i class="ph-duotone ph-truck text-2xl animate-bounce"
+                                        style="animation-duration: 3s;"></i>
+                                </div>
+                                {% else %}
+                                <div
+                                    class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                                    <i class="ph-duotone ph-hourglass break-all text-2xl"></i>
+                                </div>
+                                {% endif %}
+
                                 <div>
-                                    <h6 class="fw-bold mb-1">{{ order.tracking_number }}</h6>
-                                    <div class="text-muted small d-flex align-items-center gap-1">
+                                    <h4 class="text-base font-bold text-slate-800 font-display flex items-center gap-2">
+                                        {{ order.tracking_number }}
+                                    </h4>
+                                    <div
+                                        class="text-sm font-medium text-slate-500 mt-1 flex items-center gap-1.5 break-words">
                                         {% if order.origin and order.destination %}
-                                        <span>{{ order.origin }}</span>
-                                        <i class="bi bi-arrow-right mx-1"></i>
-                                        <span>{{ order.destination }}</span>
+                                        <span class="truncate max-w-[100px] sm:max-w-[150px]">{{ order.origin }}</span>
+                                        <i class="ph-bold ph-arrow-right text-slate-300"></i>
+                                        <span class="truncate max-w-[100px] sm:max-w-[150px]">{{ order.destination
+                                            }}</span>
                                         {% else %}
-                                        <span class="fst-italic"><i class="bi bi-hourglass-split me-1"></i> Syncing via
-                                            API...</span>
+                                        <i class="ph ph-arrows-clockwise animate-spin me-1"></i> Syncing...
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="d-flex align-items-center gap-4">
-                                <div class="text-end">
-                                    {% set badge_class = 'bg-secondary' %}
-                                    {% set text_color = 'text-white' %}
+                            <div
+                                class="flex items-center justify-between sm:justify-end gap-6 sm:w-auto w-full pt-3 sm:pt-0 border-t border-slate-200 sm:border-0 pointer-events-none">
+                                <div class="text-left sm:text-right">
+                                    <!-- Badge Logic -->
                                     {% if order.current_status == 'DELIVERED' %}
-                                    {% set badge_class = 'bg-success-subtle' %}
-                                    {% set text_color = 'text-success' %}
-                                    {% elif order.current_status == 'PENDING' %}
-                                    {% set badge_class = 'bg-warning-subtle' %}
-                                    {% set text_color = 'text-warning' %}
-                                    {% elif order.current_status == 'IN TRANSIT' %}
-                                    {% set badge_class = 'bg-info-subtle' %}
-                                    {% set text_color = 'text-info-emphasis' %}
-                                    {% endif %}
                                     <span
-                                        class="badge rounded-pill {{ badge_class }} {{ text_color }} px-3 py-2 fw-medium mb-1 border-0">
-                                        <i class="bi bi-circle-fill small me-1" style="font-size: 0.5rem;"></i> {{
-                                        order.current_status }}
+                                        class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-700 uppercase tracking-wide">
+                                        {{ order.current_status }}
                                     </span>
-                                    <div class="text-muted" style="font-size: 0.75rem;">
-                                        Updated: {{ order.last_updated.strftime('%H:%M') }}
+                                    {% elif order.current_status == 'IN TRANSIT' %}
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-blue-100 text-blue-700 uppercase tracking-wide">
+                                        {{ order.current_status }}
+                                    </span>
+                                    {% elif order.current_status == 'PENDING' %}
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-wide">
+                                        {{ order.current_status }}
+                                    </span>
+                                    {% else %}
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 uppercase tracking-wide">
+                                        {{ order.current_status }}
+                                    </span>
+                                    {% endif %}
+
+                                    <div class="text-[11px] font-medium text-slate-400 mt-1.5">
+                                        Updated {{ order.last_updated.strftime('%H:%M') }}
                                     </div>
                                 </div>
-                                <a href="/order/{{ order.id }}"
-                                    class="btn btn-sm btn-light rounded-circle shadow-sm p-2 action-btn"
-                                    title="View Details">
-                                    <i class="bi bi-chevron-right text-dark"></i>
-                                </a>
+
+                                <div
+                                    class="w-8 h-8 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-brand-500 group-hover:border-brand-200 transition-colors shrink-0">
+                                    <i class="ph-bold ph-caret-right"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {% else %}
-                    <div class="text-center py-5">
-                        <div class="display-1 text-muted opacity-25 mb-3"><i class="bi bi-inbox"></i></div>
-                        <h5 class="text-muted fw-normal">No items in your tracking list</h5>
-                        <p class="text-muted small">Add a tracking number to get started.</p>
-                    </div>
+
                     {% endfor %}
                 </div>
+                {% else %}
+                <div class="flex flex-col items-center justify-center py-16 text-center h-full min-h-[300px]">
+                    <div
+                        class="w-24 h-24 mb-6 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                        <i class="ph-duotone ph-package text-5xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-display text-slate-800 mb-2">No Active Shipments</h3>
+                    <p class="text-slate-500 font-medium max-w-sm mx-auto">You aren't tracking any parcels right now.
+                        Add a tracking number to monitor its journey.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
