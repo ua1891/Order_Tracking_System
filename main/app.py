@@ -9,7 +9,7 @@ if root_path not in sys.path:
 
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from database.models import db, Order, Notification
-from backend.tcs_client import get_tracking_details
+from backend.tcs_client import get_tracking_details, parse_tracking_summary
 from notifications.scheduler import start_scheduler
 
 # Define paths for frontend and database based on new structure
@@ -23,8 +23,8 @@ app = Flask(__name__,
             instance_path=database_instance_path)
 
 # Basic config
-app.config['SECRET_KEY'] = 'super-secret-key-123'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tracking.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default-dev-key-fallback')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///tracking.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -48,31 +48,15 @@ def dashboard():
             flash("Tracking Number already exists in the system.", "warning")
             return redirect(url_for('dashboard'))
             
-        # Optionally fetch current status dynamically
+        # Fetch current status dynamically using the new TCS ENVIO Tracking API
         details = get_tracking_details(tracking_number)
-        current_status = "PENDING"
-        origin = None
-        destination = None
-        
-        if details:
-            if 'Checkpoints' in details and len(details['Checkpoints']) > 0:
-                 current_status = details['Checkpoints'][-1].get('status', 'PENDING')
-            
-            if 'TrackInfo' in details and len(details['TrackInfo']) > 0:
-                track_info = details['TrackInfo'][0]
-                origin_city = track_info.get('origin', '')
-                origin_country = track_info.get('originCountry', '')
-                dest_city = track_info.get('destination', '')
-                dest_country = track_info.get('destinationCountry', '')
-                
-                origin = f"{origin_city}, {origin_country}".strip(', ')
-                destination = f"{dest_city}, {dest_country}".strip(', ')
+        summary = parse_tracking_summary(details)
         
         new_order = Order(
             tracking_number=tracking_number,
-            origin=origin,
-            destination=destination,
-            current_status=current_status
+            origin=summary.get('origin'),
+            destination=summary.get('destination'),
+            current_status=summary.get('current_status', 'PENDING')
         )
         db.session.add(new_order)
         db.session.commit()
